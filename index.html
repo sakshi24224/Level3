@@ -43,7 +43,7 @@ body{font-family:'Inter',sans-serif;font-size:13.5px;background:var(--bg);color:
 .shell{display:flex;height:calc(100vh - 54px)}
 
 /* SIDEBAR */
-.sidebar{width:236px;min-width:236px;background:var(--nav);overflow-y:auto;padding:14px 10px 28px;display:flex;flex-direction:column;gap:0}
+.sidebar{width:280px;min-width:280px;background:var(--nav);overflow-y:auto;padding:14px 10px 28px;display:flex;flex-direction:column;gap:0}
 .sb-sec{margin-bottom:14px}
 .sb-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;padding:0 2px}
 .sb-label{font-family:'Space Grotesk',sans-serif;font-size:9.5px;font-weight:700;color:var(--nav-dim);text-transform:uppercase;letter-spacing:.11em;display:inline-flex;align-items:center;gap:4px}
@@ -69,7 +69,8 @@ body{font-family:'Inter',sans-serif;font-size:13.5px;background:var(--bg);color:
 .chip.banti.on{background:rgba(220,38,38,.18);border-color:rgba(220,38,38,.45);color:#fca5a5;font-weight:600}
 /* Slider */
 .sl-row{display:flex;align-items:center;gap:8px;padding:0 2px;margin-top:2px}
-.sl-row input[type=range]{flex:1;accent-color:var(--pu);cursor:pointer;height:3px}
+.sl-row input[type=range]{flex:1;accent-color:var(--pu);cursor:pointer}
+.conf-sl-wrap input[type=range]{accent-color:var(--pu);cursor:pointer}
 .sl-val{font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:#c4b0f0;min-width:30px;text-align:right}
 /* Conf slider with dual markers */
 .conf-sl-wrap{padding:0 2px;margin-top:4px}
@@ -235,7 +236,8 @@ tbody td:last-child{border-radius:0 var(--r6) var(--r6) 0}
     <div class="sb-sec">
       <div class="sw">
         <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input class="sb-inp" id="qS" placeholder="Search gene…" oninput="go()">
+        <input class="sb-inp" id="qS" list="qSSugg" placeholder="Search gene…" oninput="go();updateQSSugg(this.value)">
+        <datalist id="qSSugg"></datalist>
       </div>
     </div>
     <div class="sb-div"></div>
@@ -243,10 +245,11 @@ tbody td:last-child{border-radius:0 var(--r6) var(--r6) 0}
     <!-- 1. Score Threshold -->
     <div class="sb-sec">
       <div class="sb-row"><span class="sb-label tip-wrap">Score Threshold<span class="tip-icon">?</span><span class="tip-box">The combined total score derived from all analyses, including WGCNA, MOFA, correlation, and DEG.</span></span></div>
-      <div class="sl-row">
-        <input type="range" id="scoreR" min="0" max="100" value="0" oninput="upScore(this.value)">
-        <span class="sl-val" id="scoreV">0.00</span>
+      <div class="conf-sl-wrap">
+        <input type="range" id="scoreR" min="0" max="100" value="0" oninput="upScore(this.value)" style="width:100%">
+        <div class="conf-labels"><span>0.0</span><span>0.25</span><span>0.5</span><span>0.75</span><span>1.0</span></div>
       </div>
+      <div style="text-align:right;padding:0 2px;margin-top:2px"><span class="sl-val" id="scoreV">0.00</span></div>
     </div>
 
     <!-- 2. Direction Confidence slider -->
@@ -283,24 +286,24 @@ tbody td:last-child{border-radius:0 var(--r6) var(--r6) 0}
         <span class="sb-label tip-wrap">🟢 Pro Pathway Buckets<span class="tip-icon">?</span><span class="tip-box">Pro-productivity functional pathway bucket (v1 Cascade). Gene&#39;s GO/KEGG annotations map to pathways that support production.</span></span>
         <span class="desel" onclick="deselAll('bpro')">Deselect all</span>
       </div>
-      <div class="chips"><span class="chip bpro on" data-f="bpro" data-v="Exocytosis / Secretion" onclick="tmc(this,'bpro')">Exocytosis / Secretion</span>
-<span class="chip bpro on" data-f="bpro" data-v="Folding & Post-Translational Modification" onclick="tmc(this,'bpro')">Folding & Post-Translational Modification</span>
-<span class="chip bpro on" data-f="bpro" data-v="mRNA Processing and Export" onclick="tmc(this,'bpro')">mRNA Processing and Export</span>
-<span class="chip bpro on" data-f="bpro" data-v="Quality Control (UPR)" onclick="tmc(this,'bpro')">Quality Control (UPR)</span>
-<span class="chip bpro on" data-f="bpro" data-v="Transcription & Pre-mRNA Synthesis" onclick="tmc(this,'bpro')">Transcription & Pre-mRNA Synthesis</span>
-<span class="chip bpro on" data-f="bpro" data-v="Transgene & Chromatin Integration" onclick="tmc(this,'bpro')">Transgene & Chromatin Integration</span>
-<span class="chip bpro on" data-f="bpro" data-v="Translation Initiation" onclick="tmc(this,'bpro')">Translation Initiation</span>
-<span class="chip bpro on" data-f="bpro" data-v="Vesicle Packaging & Secretory Pathway" onclick="tmc(this,'bpro')">Vesicle Packaging & Secretory Pathway</span></div>
+      <div class="chips"><span class="chip bpro on" data-f="bpro" data-v="Exocytosis / Secretion" onclick="bktToggle(this,'bpro')">Exocytosis / Secretion</span>
+<span class="chip bpro on" data-f="bpro" data-v="Folding & Post-Translational Modification" onclick="bktToggle(this,'bpro')">Folding & Post-Translational Modification</span>
+<span class="chip bpro on" data-f="bpro" data-v="mRNA Processing and Export" onclick="bktToggle(this,'bpro')">mRNA Processing and Export</span>
+<span class="chip bpro on" data-f="bpro" data-v="Quality Control (UPR)" onclick="bktToggle(this,'bpro')">Quality Control (UPR)</span>
+<span class="chip bpro on" data-f="bpro" data-v="Transcription & Pre-mRNA Synthesis" onclick="bktToggle(this,'bpro')">Transcription & Pre-mRNA Synthesis</span>
+<span class="chip bpro on" data-f="bpro" data-v="Transgene & Chromatin Integration" onclick="bktToggle(this,'bpro')">Transgene & Chromatin Integration</span>
+<span class="chip bpro on" data-f="bpro" data-v="Translation Initiation" onclick="bktToggle(this,'bpro')">Translation Initiation</span>
+<span class="chip bpro on" data-f="bpro" data-v="Vesicle Packaging & Secretory Pathway" onclick="bktToggle(this,'bpro')">Vesicle Packaging & Secretory Pathway</span></div>
       <div class="sb-row" style="margin-top:8px">
         <span class="sb-label tip-wrap">🔴 Anti Pathway Buckets<span class="tip-icon">?</span><span class="tip-box">Anti-productivity functional pathway bucket. Gene&#39;s GO/KEGG annotations map to pathways that inhibit production.</span></span>
         <span class="desel" onclick="deselAll('banti')">Deselect all</span>
       </div>
-      <div class="chips"><span class="chip banti on" data-f="banti" data-v="Apoptosis & Cell Death" onclick="tmc(this,'banti')">Apoptosis & Cell Death</span>
-<span class="chip banti on" data-f="banti" data-v="Autophagy & Bulk Degradation" onclick="tmc(this,'banti')">Autophagy & Bulk Degradation</span>
-<span class="chip banti on" data-f="banti" data-v="Cell Cycle Arrest & Senescence" onclick="tmc(this,'banti')">Cell Cycle Arrest & Senescence</span>
-<span class="chip banti on" data-f="banti" data-v="Inflammatory & Innate Immune Stress" onclick="tmc(this,'banti')">Inflammatory & Innate Immune Stress</span>
-<span class="chip banti on" data-f="banti" data-v="Metabolic Stress (Lactate / Ammonia / ROS)" onclick="tmc(this,'banti')">Metabolic Stress (Lactate / Ammonia / ROS)</span>
-<span class="chip banti on" data-f="banti" data-v="Ubiquitin / Proteasome Degradation" onclick="tmc(this,'banti')">Ubiquitin / Proteasome Degradation</span></div>
+      <div class="chips"><span class="chip banti on" data-f="banti" data-v="Apoptosis & Cell Death" onclick="bktToggle(this,'banti')">Apoptosis & Cell Death</span>
+<span class="chip banti on" data-f="banti" data-v="Autophagy & Bulk Degradation" onclick="bktToggle(this,'banti')">Autophagy & Bulk Degradation</span>
+<span class="chip banti on" data-f="banti" data-v="Cell Cycle Arrest & Senescence" onclick="bktToggle(this,'banti')">Cell Cycle Arrest & Senescence</span>
+<span class="chip banti on" data-f="banti" data-v="Inflammatory & Innate Immune Stress" onclick="bktToggle(this,'banti')">Inflammatory & Innate Immune Stress</span>
+<span class="chip banti on" data-f="banti" data-v="Metabolic Stress (Lactate / Ammonia / ROS)" onclick="bktToggle(this,'banti')">Metabolic Stress (Lactate / Ammonia / ROS)</span>
+<span class="chip banti on" data-f="banti" data-v="Ubiquitin / Proteasome Degradation" onclick="bktToggle(this,'banti')">Ubiquitin / Proteasome Degradation</span></div>
     </div>
 
     <!-- 6. Tier -->
@@ -438,7 +441,8 @@ tbody td:last-child{border-radius:0 var(--r6) var(--r6) 0}
 <!-- GENE VIEW -->
 <div id="geneView" style="display:none;height:calc(100vh - 54px);flex-direction:column">
   <div style="padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:10px;flex-shrink:0">
-    <input id="gsi" style="flex:1;max-width:480px;padding:8px 13px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg);font-family:Inter,sans-serif;font-size:13.5px;color:var(--txt);outline:none;transition:.15s" placeholder="Search gene symbol (e.g. Aar2, Abca1)…" onkeydown="if(event.key==='Enter')doGV()">
+    <input id="gsi" list="geneSugg" style="flex:1;max-width:480px;padding:8px 13px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg);font-family:Inter,sans-serif;font-size:13.5px;color:var(--txt);outline:none;transition:.15s" placeholder="Search gene symbol (e.g. Aar2, Abca1)…" onkeydown="if(event.key==='Enter')doGV()" oninput="updateSugg(this.value)">
+    <datalist id="geneSugg"></datalist>
     <button onclick="doGV()" style="padding:8px 20px;border-radius:6px;background:var(--pu);color:#fff;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600">View Gene</button>
   </div>
   <div class="gvcont" id="gvcont">
@@ -623,7 +627,6 @@ function rTbl() {
     const tc2=g.tier.replace(' ','');
     const typ=g.type==='KD/KO'?'kdko':'oe';
     const pa=g.pro_anti==='pro'?'pro':g.pro_anti==='anti'?'anti':'proanti';
-    const pips=Array.from({length:10},(_,i)=>`<div class="pip ${i<g.conf?'on':''}"></div>`).join('');
     const flags=`${g.is_tf?'<span class="fl-tag fl-tf">TF</span>':''}${g.wgcna_hub?'<span class="fl-tag fl-hub">Hub</span>':''}`;
     const pParts=(g.pro_bkt||'').split(';').filter(Boolean).map(b=>`<span class="bkt-pro">${b.trim()}</span>`).join('');
     const aParts=(g.anti_bkt||'').split(';').filter(Boolean).map(b=>`<span class="bkt-anti">${b.trim()}</span>`).join('');
@@ -634,7 +637,7 @@ function rTbl() {
       <td><div class="sbar"><div class="strack"><div class="sfill" style="width:${w}%;background:${c}"></div></div><span class="snum">${g.score.toFixed(4)}</span></div></td>
       <td><span class="bdg ${typ}">${g.type==='KD/KO'?'↓ KD/KO':'↑ OE'}</span></td>
       <td><span class="bdg ${tc2}">${g.tier}</span></td>
-      <td><div style="display:flex;align-items:center;gap:4px"><div class="pips">${pips}</div>${flags}</div></td>
+      <td><div style="display:flex;align-items:center;gap:4px">${flags||'—'}</div></td>
       <td>${moBdg(g.mo1)}</td>
       <td>${moBdg(g.pub_bms)}</td>
       <td><span style="font-size:11.5px;font-weight:600;color:${lvlColor(g.essn)}">${g.essn||'—'}</span></td>
@@ -714,13 +717,15 @@ function aCard(title,dir,score) {
 function bSum(g,d,c) {
   const circ=Math.round(g.score*220);
   const rows=[
-    ['Total Score',`<span style="color:${c};font-weight:700">${g.score.toFixed(4)}</span>`],
-    ['Tier',g.tier],['Predicted Intervention',g.type],['Direction Confidence',`${g.conf}/10`],
-    ['Productivity Effect',g.pro_anti],['Target Category',g.tgt_cat||'NA'],
-    ['Multi-omics Coverage',g.mo_cov||'—'],['All Pheno Concordant',g.concordant?'✅ Yes':'❌ No'],
-    ['Tradeoff Conflict',g.tradeoff?'⚠️ Yes':'✅ No'],
-    ['Publications (BMS KG)',g.pub_count>0?`${g.pub_count} pub(s)`:'None'],
-    ...(g.known&&g.known!=='nan'?[['Known Gene Mapped',g.known]]:[]),
+    ['Total Score',`<span style="color:${c};font-weight:700">${g.score.toFixed(4)}</span>`,'Combined score from WGCNA, MOFA, correlation, and DEG analyses'],
+    ['Tier',g.tier,'Tier 1: Score≥0.9 conf 9-10 | Tier 2: Score>0.75 conf≥5 | Tier 3: Score>0.495 conf≥3'],
+    ['Predicted Intervention',g.type,'Recommended perturbation: OE=Overexpression, KD/KO=Knockdown/Knockout'],
+    ['Direction Confidence',`${g.conf}/10`,'Number of analyses agreeing on the intervention direction (out of 10)'],
+    ['Productivity Effect',g.pro_anti,'Pro=supports productivity | Anti=negatively impacts | Pro+Anti=both pathways'],
+    ['Target Category',g.tgt_cat||'NA','Known=established in literature | Novel=no prior known association'],
+    ['Multi-omics Coverage',g.mo_cov||'—','Which omics layers support this gene (gene/protein/metabolite)'],
+    ['Publications (BMS KG)',g.pub_count>0?`${g.pub_count} pub(s)`:'None','Published evidence from BMS Knowledge Graph linking gene to CHO productivity'],
+    ...(g.known&&g.known!=='nan'?[['Known Gene Mapped',g.known,'Known target genes this gene maps to in the BMS KG']]:[]),
   ];
   const pT=(g.pro_bkt||'').split(';').filter(Boolean).map(b=>`<span class="bkt-pro">${b.trim()}</span>`).join(' ');
   const aT=(g.anti_bkt||'').split(';').filter(Boolean).map(b=>`<span class="bkt-anti">${b.trim()}</span>`).join(' ');
@@ -730,7 +735,7 @@ function bSum(g,d,c) {
       <circle cx="40" cy="40" r="35" fill="none" stroke="${c}" stroke-width="6" stroke-dasharray="${circ} 220" stroke-linecap="round"/></svg>
       <div class="rnum">${g.score.toFixed(2)}</div>
     </div>
-    <div class="ml">${rows.map(([k,v])=>`<div class="mi"><span class="mk">${k}</span><span class="mv">${v}</span></div>`).join('')}</div>
+    <div class="ml">${rows.map(([k,v,tip])=>`<div class="mi"><span class="mk" ${tip?`title="${tip}" style="cursor:help;border-bottom:1px dashed var(--txt3)"`:''}>${k}</span><span class="mv">${v}</span></div>`).join('')}</div>
   </div>
   ${pT||aT?`<div style="margin-bottom:14px"><div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Functional Pathway</div><div style="display:flex;flex-wrap:wrap;gap:4px">${pT}${aT}</div></div>`:''}
   <div class="stit">Phenotype Aggregated Scores</div>
@@ -784,7 +789,7 @@ function bL3(g) {
   <div class="stit">Classification</div>
   <div class="l3grid">
     <div class="l3card"><div class="l3ct">Target Category</div><div class="l3cv">${g.tgt_cat||'NA'}</div></div>
-    <div class="l3card"><div class="l3ct">Functional Bucket (L2)</div><div class="l3cv" style="font-size:11px">${g.func_bkt||'—'}</div></div>
+    <div class="l3card"><div class="l3ct">Functional Bucket</div><div class="l3cv" style="font-size:11px">${g.func_bkt||'—'}</div></div>
     <div class="l3card"><div class="l3ct">Productivity Dir.</div><div class="l3cv">${g.pro_anti||'—'}</div></div>
     ${g.known&&g.known!=='nan'?`<div class="l3card" style="grid-column:1/-1"><div class="l3ct">Known Gene Mapped To</div><div class="l3cv" style="font-size:11px;font-weight:400">${g.known}</div></div>`:''}
   </div>`;
@@ -824,8 +829,7 @@ function bExpr() {
     <span style="font-size:11px;color:var(--txt3);display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:50%;background:rgba(37,99,235,.18);border:1.5px solid rgba(37,99,235,.5);display:inline-block"></span>C144 clones</span>
   </div>
   <div id="exprChartBox" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px 14px 12px;position:relative;min-height:240px">
-    <canvas id="eC" style="display:block;width:100%;height:220px"></canvas>
-    <div id="noE" style="display:none;padding:24px;text-align:center;color:var(--txt3);font-size:12.5px">No expression data for this gene.</div>
+    <div id="noE" style="padding:24px;text-align:center;color:var(--txt3);font-size:12.5px">Loading expression data…</div>
   </div>
   <div style="margin-top:10px;font-size:11px;color:var(--txt3)">Bold = mean · Faint = individual clones · C144 day 14 only clone 10B6.</div>`;
 }
@@ -835,12 +839,16 @@ function drawC(name) {
   const gene=(name||'').trim(), expr=EXPR[gene];
   const box=document.getElementById('exprChartBox'), noE=document.getElementById('noE');
   if(!box) return;
-  const old=document.getElementById('eC'); if(old) old.remove();
+  // Remove any old canvas
+  const oldC=document.getElementById('eC'); if(oldC) oldC.remove();
+  if(!expr||(!expr.Nivo&&!expr.C144)){
+    if(noE){noE.textContent='No expression data for this gene.';noE.style.display='';}
+    return;
+  }
   const canvas=document.createElement('canvas');
   canvas.id='eC'; canvas.style.cssText='display:block;width:100%;height:220px';
-  box.insertBefore(canvas,noE);
-  if(!expr||(!expr.Nivo&&!expr.C144)){canvas.style.display='none';if(noE)noE.style.display='';return;}
-  if(noE) noE.style.display='none';
+  if(noE){noE.style.display='none'; box.insertBefore(canvas,noE);}
+  else box.appendChild(canvas);
   renderExprChart(canvas,expr); attachChartTooltip(canvas);
 }
 
@@ -871,6 +879,21 @@ function switchTab(tab) {
   document.getElementById('geneView').style.display=tab==='gene'?'flex':'none';
 }
 
+function updateQSSugg(q) {
+  const dl=document.getElementById('qSSugg'); if(!dl) return;
+  if(!q||q.length<2){dl.innerHTML='';return;}
+  const ql=q.toLowerCase();
+  const matches=GENES.filter(g=>g.name.toLowerCase().startsWith(ql)).slice(0,8);
+  dl.innerHTML=matches.map(g=>`<option value="${g.name}">`).join('');
+}
+function updateSugg(q) {
+  const dl=document.getElementById('geneSugg'); if(!dl) return;
+  if(!q||q.length<2){dl.innerHTML='';return;}
+  const ql=q.toLowerCase();
+  const matches=GENES.filter(g=>g.name.toLowerCase().startsWith(ql)).slice(0,10)
+    .concat(GENES.filter(g=>!g.name.toLowerCase().startsWith(ql)&&g.name.toLowerCase().includes(ql)).slice(0,5));
+  dl.innerHTML=[...new Set(matches.map(g=>g.name))].map(n=>`<option value="${n}">`).join('');
+}
 function doGV() {
   const q=(document.getElementById('gsi').value||'').trim();
   if(!q) return;
@@ -931,18 +954,7 @@ function gvT(idx,btn) {
   for(let i=0;i<5;i++) {const p=document.getElementById('gvP'+i); if(p) p.style.display=i===idx?'block':'none';}
   if(idx===3) {
     const gn=document.getElementById('gvcont').getAttribute('data-gn')||'';
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      const expr=EXPR[gn];
-      const box=document.getElementById('exprChartBox'), noE=document.getElementById('noE');
-      if(!box) return;
-      const old=document.getElementById('eC'); if(old) old.remove();
-      const canvas=document.createElement('canvas');
-      canvas.id='eC'; canvas.style.cssText='display:block;width:100%;height:220px';
-      box.insertBefore(canvas,noE);
-      if(!expr||(!expr.Nivo&&!expr.C144)){canvas.style.display='none';if(noE)noE.style.display='';return;}
-      if(noE) noE.style.display='none';
-      renderExprChart(canvas,expr); attachChartTooltip(canvas);
-    }));
+    requestAnimationFrame(()=>requestAnimationFrame(()=>drawC(gn)));
   }
 }
 
